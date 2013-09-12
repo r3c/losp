@@ -22,7 +22,7 @@ class	Locale
 	private	$formatters;
 	private	$modifiers;
 
-	public function	__construct ($language, $source, $cache = null)
+	public function	__construct ($encoding, $language, $source, $cache = null)
 	{
 		// Build or load language formatters from strings or cache
 		if ($cache !== null && file_exists ($cache))
@@ -35,7 +35,7 @@ class	Locale
 			// Browse for language files and convert to formatters
 			$formatters = array ();
 
-			self::convert ($formatters, $language, $source);
+			self::convert ($formatters, $encoding, $language, $source);
 
 			// Save to cache
 			if ($cache !== null)
@@ -82,7 +82,7 @@ class	Locale
 			{
 				case self::TYPE_MODIFIER:
 					if (!isset ($this->modifiers[$chunk[1]]))
-						break;
+						throw new \Exception ('missing modifier "' . $chunk[1] . '"');
 
 					$arguments = array ();
 
@@ -125,7 +125,7 @@ class	Locale
 		return $out;
 	}
 
-	private static function	convert (&$formatters, $language, $path)
+	private static function	convert (&$formatters, $encoding, $language, $path)
 	{
 		// Recurse into directory
 		if (is_dir ($path))
@@ -133,7 +133,7 @@ class	Locale
 			foreach (scandir ($path) as $name)
 			{
 				if ($name !== '.' && $name !== '..')
-					self::convert ($formatters, $language, $path . '/' . $name);
+					self::convert ($formatters, $encoding, $language, $path . '/' . $name);
 			}
 
 			return;
@@ -157,7 +157,7 @@ class	Locale
 		{
 			try
 			{
-				self::read ($formatters, $child, '');
+				self::read ($formatters, $encoding, $child, '');
 			}
 			catch (\Exception $exception)
 			{
@@ -181,7 +181,7 @@ class	Locale
 		return var_export ($value, true);
 	}
 
-	private static function parse ($string, $outer, &$index)
+	private static function parse ($encoding, $string, $outer, &$index)
 	{
 		$chunks = array ();
 		$length = strlen ($string);
@@ -201,7 +201,7 @@ class	Locale
 					// Flush pending plain string if any
 					if ($plain !== '')
 					{
-						$chunks[] = array (self::TYPE_PLAIN, $plain);
+						$chunks[] = array (self::TYPE_PLAIN, mb_convert_encoding ($plain, $encoding, 'UTF-8'));
 						$plain = '';
 					}
 
@@ -222,7 +222,7 @@ class	Locale
 								++$i;
 							}
 
-							$arguments[] = self::parse ($string, false, $i);
+							$arguments[] = self::parse ($encoding, $string, false, $i);
 						}
 
 						// Append modifier expression
@@ -260,12 +260,12 @@ class	Locale
 
 		// Flush remaining characters
 		if ($plain !== '')
-			$chunks[] = array (self::TYPE_PLAIN, $plain);
+			$chunks[] = array (self::TYPE_PLAIN, mb_convert_encoding ($plain, $encoding, 'UTF-8'));
 
 		return $chunks;
 	}
 
-	private static function	read (&$formatters, $node, $prefix)
+	private static function	read (&$formatters, $encoding, $node, $prefix)
 	{
 		if ($node->nodeType !== XML_ELEMENT_NODE)
 			return;
@@ -274,7 +274,7 @@ class	Locale
 		{
 			case 'section':
 				foreach ($node->childNodes as $child)
-					self::read ($formatters, $child, $prefix . $node->getAttribute ('prefix'));
+					self::read ($formatters, $encoding, $child, $prefix . $node->getAttribute ('prefix'));
 
 				break;
 
@@ -283,7 +283,7 @@ class	Locale
 				$i = 0;
 
 				if ($key !== '')
-					$formatters[$prefix . $key] = self::parse ($node->nodeValue, true, $i);
+					$formatters[$prefix . $key] = self::parse ($encoding, $node->nodeValue, true, $i);
 
 				break;
 		}
