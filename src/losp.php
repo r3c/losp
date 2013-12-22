@@ -25,9 +25,7 @@ class	Locale
 	public function	__construct ($encoding, $language, $source, $cache = null)
 	{
 		// Build or load language formatters from strings or cache
-		if ($cache !== null && file_exists ($cache))
-			require ($cache);
-		else
+		if ($cache === null || (@include $cache) === false)
 		{
 			if (!file_exists ($source))
 				throw new \Exception ('unable to load strings from source');
