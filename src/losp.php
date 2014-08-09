@@ -56,12 +56,12 @@ class	Locale
 		$this->modifiers = array ();	
 	}
 
-	public function	assign ($modifier, $callback)
+	public function assign ($modifier, $callback)
 	{
 		$this->modifiers[$modifier] = $callback;
 	}
 
-	public function	format ($key, $params = null)
+	public function format ($key, $params = null)
 	{
 		if (!isset ($this->formatters[$key]))
 			throw new \Exception ('missing formatter for key "' . $key . '"');
@@ -69,7 +69,7 @@ class	Locale
 		return $this->apply ($this->formatters[$key], $params);
 	}
 
-	private function	apply ($chunks, $params)
+	private function apply ($chunks, $params)
 	{
 		$null = null;
 		$out = '';
@@ -96,10 +96,10 @@ class	Locale
 
 					foreach ($chunk[1] as $member)
 					{
-						if (is_object ($source) && isset ($source->$member))
-							$source =& $source->$member;
-						else if (is_array ($source) && isset ($source[$member]))
-							$source =& $source[$member];
+						$array = (array)$source;
+
+						if (isset ($array[$member]))
+							$source =& $array[$member];
 						else
 						{
 							$source =& $null;
