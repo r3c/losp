@@ -6,9 +6,9 @@
 
 namespace Losp;
 
-define ('LOSP',	'1.0.0.0');
+define ('LOSP', '1.0.0.0');
 
-class	Locale
+class Locale
 {
 	const	ESCAPE = '\\';
 	const	EVALUATOR_BEGIN = '{';
@@ -109,7 +109,7 @@ class	Locale
 					}
 
 					if ($source !== null)
-						$out .= $source;
+						$out .= (string)$source;
 
 					break;
 
