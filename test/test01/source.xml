@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+
+How to use:
+
+Root node must be <locale> with an attribute language="X", where X is the
+language code for which this strings file is. You can have multiple files for a
+single language, their contents will be merged when processed.
+
+Child nodes can be either <section> or <string> nodes :
+
+- <string> nodes associate a unique key (attribute "key") with a printable text
+  string in desired language.
+- <section> nodes contain string nodes (or other section nodes) to which they
+  prepend a fixed key prefix (attribute "prefix").
+
+Text strings can contain literal text and references to variables and modifiers
+resolved at runtime. To read the value of a variable use the {varname} syntax,
+dots are also allowed to access fields or dictionary keys: {user.login}.
+
+Modifiers can be used to produce an output from one or more string inputs.
+Syntax is {name:a1,a2,a3} where 'name' is modifier name and 'aN' are modifier
+arguments. Example: '{sum:1,2}' would return '3' if modifier 'sum' computed the
+sum of its arguments.
+
+Variable values or result of modifiers can be used as arguments to other
+modifiers: {if:{a},{if:{b},{c}}}
+
+Available modifiers are:
+
+- {calc:lhs,op,rhs,format}: evaluate result of binary operator on the
+    two given operands. Result can be formatted using default Python string
+	formats.
+- {case:value,match1,result1,match2,result2,...,default}: match input value
+    with a list of constants, and return matched result or use default value.
+- {date:datetime,format}: convert input datetime to string using given format.
+- {if:value,iftrue,iffalse}: return "iftrue" if value is set, "iffalse" else.
+    Parameter "iffalse" is optional, empty string is used by default.
+- {ifeq:a,b,iftrue,iffalse}: return iftrue if a equals b, iffalse else
+	Parameter "iffalse" is optional, empty string is used by default.
+    Same modifiers are available for other comparison types:
+    - ifge (greater or equal)
+    - ifgt (greater than),
+    - ifle (lower or equal)
+    - iflt (lower than)
+    - ifne (not equal)
+- {pad:input,width,char}: pad input string up to "abs(width)" characters by
+    reapeating "char" as many times as needed after (or before, if "width" is
+	negative) it. Parameter "char" is optional, space is used by default.
+
+-->
+
+<locale language="fr">
+	<section prefix="test.">
+		<string key="01">Bonjour sire ! Il fait beau, mais frais, mais beau !</string>
+		<string key="02">Vous avez {count} nouveau(x) message(s)</string>
+		<string key="03">Modifier le compte '{account.name}'</string>
+		<string key="04">Nous sommes le {date:{today},d/m/y}</string>
+		<string key="05">Vous avez {count} {if:{gt:{count},1},nouveaux messages,nouveau message}, avec accord s'il vous plait !</string>
+		<string key="06">{a} cochon{if:{gt:{a},1},s}, {b} poule{if:{gt:{b},1},s}, accordé{if:{gt:{add:{a},{b}},1},s} également</string>
+		<string key="07">Nombre de visites: {pad:{count},-8,0} (mais on prévoit 8 caractères, au cas où)</string>
+		<string key="08">{pad:À gauche,20,#}, des canapés !</string>
+		<string key="09">{pad:À droite,-20,#}, des canapés !</string>
+		<string key="10">La réponse est {x.y.z}</string>
+	</section>
+</locale>
