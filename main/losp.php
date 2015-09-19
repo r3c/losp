@@ -8,6 +8,24 @@ namespace Losp;
 
 define ('LOSP', '1.0.0.0');
 
+class FormatException extends \Exception
+{
+	public function __construct ($message)
+	{
+		parent::__construct ($message);
+	}
+}
+
+class ParseException extends \Exception
+{
+	public function __construct ($node, $message)
+	{
+		parent::__construct ($message);
+
+		$this->node = $node;
+	}
+}
+
 class Locale
 {
 	const ESCAPE = '\\';
@@ -28,22 +46,30 @@ class Locale
 		if ($cache === null || (@include $cache) === false)
 		{
 			if (!file_exists ($source))
-				throw new \Exception ('unable to load strings from source');
+				throw new \Exception ('strings path "' . $source . '" doesn\'t exist');
 
 			// Browse for language files and convert to formatters
 			$formatters = array ();
+			$references = array ();
 
-			self::convert ($formatters, $encoding, $language, $source);
+			self::convert ($formatters, $references, $encoding, $language, $source);
+
+			// Resolve aliased references
+			foreach ($references as $target => $reference)
+			{
+				if (!isset ($formatters[$reference]))
+					throw new \Exception ('invalid reference to key "' . $reference . '" for alias "' . $target . '"');
+
+				$formatters[$target] = $formatters[$reference];
+			}
 
 			// Save to cache
 			if ($cache !== null)
 			{
-				$contents = '<?php ' .
-					'$formatters = ' . self::export ($formatters, true) . '; ' .
-				'?>';
+				$contents = '<?php $formatters = ' . self::export ($formatters, true) . '; ?>';
 
 				if (file_put_contents ($cache, $contents, LOCK_EX) === false)
-					throw new \Exception ('unable to create cache');
+					throw new \Exception ('unable to write cache file "' . $cache . '" to disk');
 			}
 		}
 
@@ -63,10 +89,17 @@ class Locale
 
 	public function format ($key, $params = null)
 	{
-		if (!isset ($this->formatters[$key]))
-			throw new \Exception ('missing formatter for key "' . $key . '"');
+		try
+		{
+			if (!isset ($this->formatters[$key]))
+				throw new FormatException ('unknown formatter');
 
-		return $this->apply ($this->formatters[$key], $params);
+			return $this->apply ($this->formatters[$key], $params);
+		}
+		catch (FormatException $exception)
+		{
+			throw new \Exception ($exception->getMessage () . ' for key "' . $key . '"');
+		}
 	}
 
 	private function apply ($chunks, $params)
@@ -80,7 +113,7 @@ class Locale
 			{
 				case self::TYPE_MODIFIER:
 					if (!isset ($this->modifiers[$chunk[1]]))
-						throw new \Exception ('missing modifier "' . $chunk[1] . '"');
+						throw new FormatException ('unknown modifier "' . $chunk[1] . '"');
 
 					$arguments = array ();
 
@@ -123,7 +156,7 @@ class Locale
 		return $out;
 	}
 
-	private static function	convert (&$formatters, $encoding, $language, $path)
+	private static function	convert (&$formatters, &$references, $encoding, $language, $path)
 	{
 		// Recurse into directory
 		if (is_dir ($path))
@@ -131,7 +164,7 @@ class Locale
 			foreach (scandir ($path) as $name)
 			{
 				if ($name !== '.' && $name !== '..')
-					self::convert ($formatters, $encoding, $language, $path . '/' . $name);
+					self::convert ($formatters, $references, $encoding, $language, $path . '/' . $name);
 			}
 
 			return;
@@ -141,12 +174,15 @@ class Locale
 		$document = new \DOMDocument ();
 
 		if (!$document->load ($path))
-			throw new \Exception ('file "' . $path . '" can\'t be loaded');
+			throw new \Exception ('can\'t load file "' . $path . '"');
 
 		$locale = $document->documentElement;
 
 		if ($locale->nodeType !== XML_ELEMENT_NODE || $locale->nodeName !== 'locale')
-			throw new \Exception ('file "' . $path . '" has an invalid root node');
+			throw new \Exception ('root node in file "' . $path . '" must be named "locale"');
+
+		if (!$locale->hasAttribute ('language'))
+			throw new \Exception ('root node in file "' . $path . '" is missing "language" attribute');
 
 		if ($locale->getAttribute ('language') !== $language)
 			return;
@@ -155,11 +191,11 @@ class Locale
 		{
 			try
 			{
-				self::read ($formatters, $encoding, $child, '');
+				self::read ($formatters, $references, $encoding, $child, '');
 			}
-			catch (\Exception $exception)
+			catch (ParseException $exception)
 			{
-				throw new \Exception ('file "' . $path . '" is invalid: ' . $exception->getMessage ());
+				throw new \Exception ($exception->getMessage () . ' in file "' . $path . '" at line ' . $exception->node->getLineNo ());
 			}
 		}
 	}
@@ -271,7 +307,7 @@ class Locale
 		return $chunks;
 	}
 
-	private static function	read (&$formatters, $encoding, $node, $prefix)
+	private static function	read (&$formatters, &$references, $encoding, $node, $prefix)
 	{
 		if ($node->nodeType !== XML_ELEMENT_NODE)
 			return;
@@ -279,17 +315,27 @@ class Locale
 		switch ($node->nodeName)
 		{
 			case 'section':
+				$prefix .= $node->getAttribute ('prefix');
+
 				foreach ($node->childNodes as $child)
-					self::read ($formatters, $encoding, $child, $prefix . $node->getAttribute ('prefix'));
+					self::read ($formatters, $references, $encoding, $child, $prefix);
 
 				break;
 
 			case 'string':
-				$key = $node->getAttribute ('key');
-				$i = 0;
+				if (!$node->hasAttribute ('key'))
+					throw new ParseException ($node, 'missing "key" attribute');
 
-				if ($key !== '')
-					$formatters[$prefix . $key] = self::parse ($encoding, $node->nodeValue, true, $i);
+				$key = $prefix . $node->getAttribute ('key');
+
+				if ($node->hasAttribute ('alias'))
+					$references[$key] = $node->getAttribute ('alias');
+				else
+				{
+					$i = 0;
+
+					$formatters[$key] = self::parse ($encoding, $node->nodeValue, true, $i);
+				}
 
 				break;
 		}

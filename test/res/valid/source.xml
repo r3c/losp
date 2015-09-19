@@ -51,7 +51,15 @@ Available modifiers are:
 
 -->
 
-<locale language="fr">
+<locale language="fr">	
+	<section prefix="error.">
+		<string key="modifier">Invalid {modifier:1} found</string>
+	</section>
+
+	<section prefix="alias.">
+		<string key="01" alias="test.01" />
+	</section>
+
 	<section prefix="test.">
 		<string key="01">Bonjour sire ! Il fait beau, mais frais, mais beau !</string>
 		<string key="02">Vous avez {count} nouveau(x) message(s)</string>
@@ -63,5 +71,9 @@ Available modifiers are:
 		<string key="08">{pad:À gauche,20,#}, des canapés !</string>
 		<string key="09">{pad:À droite,-20,#}, des canapés !</string>
 		<string key="10">La réponse est {x.y.z}</string>
+	</section>
+
+	<section prefix="alias.">
+		<string key="02" alias="test.02" />
 	</section>
 </locale>

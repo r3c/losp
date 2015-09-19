@@ -2,13 +2,28 @@
 
 require ('../main/losp.php');
 
-$losp = new Losp\Locale ('UTF-8', 'fr', 'res/test01');
+function assert_throw ($callback, $pattern)
+{
+	try
+	{
+		$callback ();
+
+		assert (false, 'no exception thrown');
+	}
+	catch (Exception $exception)
+	{
+		assert (preg_match ($pattern, $exception->getMessage ()) === 1, 'exception message "' . $exception->getMessage () . '" doesn\'t match pattern "' . $pattern . '"');
+	}
+}
+
+$losp = new Losp\Locale ('UTF-8', 'fr', 'res/valid');
 $losp->assign ('add', function ($lhs, $rhs) { return $lhs + $rhs; });
 $losp->assign ('date', function ($value, $format) { return date ($format, $value); });
 $losp->assign ('gt', function ($value, $than) { return $value > $than; });
 $losp->assign ('if', function ($test, $true, $false = '') { return $test ? $true : $false; });
 $losp->assign ('pad', function ($value, $length, $char) { return str_pad ($value, abs ($length), $char, $length < 0 ? STR_PAD_LEFT : STR_PAD_RIGHT); });
 
+// Test regular strings
 assert ($losp->format ('test.01') === 'Bonjour sire ! Il fait beau, mais frais, mais beau !');
 assert ($losp->format ('test.02', array ('count' => 3)) === 'Vous avez 3 nouveau(x) message(s)');
 assert ($losp->format ('test.03', array ('account' => array ('name' => 'Admin'))) === 'Modifier le compte \'Admin\'');
@@ -23,5 +38,20 @@ assert ($losp->format ('test.07', array ('count' => 42)) === 'Nombre de visites:
 assert ($losp->format ('test.08') === 'À gauche###########, des canapés !');
 assert ($losp->format ('test.09') === '###########À droite, des canapés !');
 assert ($losp->format ('test.10', array ('x' => array ('y' => array ('z' => 42)))) === 'La réponse est 42');
+
+// Test aliased strings
+assert ($losp->format ('alias.01') === 'Bonjour sire ! Il fait beau, mais frais, mais beau !');
+assert ($losp->format ('alias.02', array ('count' => 3)) === 'Vous avez 3 nouveau(x) message(s)');
+
+// Test formatting errors
+assert_throw (function () use ($losp) { $losp->format ('error.formatter'); }, '/unknown formatter.*error\.formatter/');
+assert_throw (function () use ($losp) { $losp->format ('error.modifier'); }, '/unknown modifier.*error\.modifier/');
+
+// Test parsing errors
+assert_throw (function () { new Losp\Locale ('UTF-8', 'fr', 'res/invalid/missing.xml'); }, '/doesn\'t exist/');
+assert_throw (function () { new Losp\Locale ('UTF-8', 'fr', 'res/invalid/root-language.xml'); }, '/missing "language" attribute/');
+assert_throw (function () { new Losp\Locale ('UTF-8', 'fr', 'res/invalid/root-name.xml'); }, '/must be named/');
+assert_throw (function () { new Losp\Locale ('UTF-8', 'en', 'res/invalid/string-alias.xml'); }, '/invalid reference/');
+assert_throw (function () { new Losp\Locale ('UTF-8', 'en', 'res/invalid/string-key.xml'); }, '/missing "key" attribute/');
 
 ?>
