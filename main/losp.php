@@ -10,14 +10,14 @@ define ('LOSP', '1.0.0.0');
 
 class Locale
 {
-	const	ESCAPE = '\\';
-	const	EVALUATOR_BEGIN = '{';
-	const	EVALUATOR_END = '}';
-	const	MODIFIER_DECLARE = ':';
-	const	MODIFIER_NEXT = ',';
-	const	TYPE_MODIFIER = 0;
-	const	TYPE_PLAIN = 1;
-	const	TYPE_VARIABLE = 2;
+	const ESCAPE = '\\';
+	const EVALUATOR_BEGIN = '{';
+	const EVALUATOR_END = '}';
+	const MODIFIER_DECLARE = ':';
+	const MODIFIER_NEXT = ',';
+	const TYPE_MODIFIER = 0;
+	const TYPE_PLAIN = 1;
+	const TYPE_VARIABLE = 2;
 
 	private	$formatters;
 	private	$modifiers;

@@ -2,7 +2,7 @@
 
 require ('../main/losp.php');
 
-$losp = new Losp\Locale ('UTF-8', 'fr', 'test01');
+$losp = new Losp\Locale ('UTF-8', 'fr', 'res/test01');
 $losp->assign ('add', function ($lhs, $rhs) { return $lhs + $rhs; });
 $losp->assign ('date', function ($value, $format) { return date ($format, $value); });
 $losp->assign ('gt', function ($value, $than) { return $value > $than; });
