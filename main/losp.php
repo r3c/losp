@@ -79,7 +79,32 @@ class Locale
 
 		// Initalize members
 		$this->formatters = $formatters;
-		$this->modifiers = array ();	
+		$this->modifiers = array
+		(
+			'case'	=> function ($value)
+			{
+				$pairs = array_slice (func_get_args (), 1);
+
+				for ($i = 0; $i + 1 < count ($pairs); $i += 2)
+				{
+					if ($pairs[$i] == $value)
+						return $pairs[$i + 1];
+				}
+
+				return $i < count ($pairs) ? $pairs[$i] : null;
+			},
+			'date'	=> function ($time, $format) { return date ($format, $time); },
+			'def'	=> function ($value, $default) { return $value ?: $default; },
+			'eq'	=> function ($lhs, $rhs, $true = '1', $false = null) { return $lhs == $rhs ? $true : $false; },
+			'ge'	=> function ($lhs, $rhs, $true = '1', $false = null) { return $lhs >= $rhs ? $true : $false; },
+			'gt'	=> function ($lhs, $rhs, $true = '1', $false = null) { return $lhs > $rhs ? $true : $false; },
+			'if'	=> function ($condition, $true = '1', $false = null) { return $condition ? $true : $false; },
+			'ifset'	=> function ($condition, $true = '1', $false = null) { return $condition !== null ? $true : $false; },
+			'le'	=> function ($lhs, $rhs, $true = '1', $false = null) { return $lhs <= $rhs ? $true : $false; },
+			'lt'	=> function ($lhs, $rhs, $true = '1', $false = null) { return $lhs < $rhs ? $true : $false; },
+			'ne'	=> function ($lhs, $rhs, $true = '1', $false = null) { return $lhs != $rhs ? $true : $false; },
+			'pad'	=> function ($string, $length, $char = ' ') { return str_pad ($string, abs ($length), $char, $length < 0 ? STR_PAD_LEFT : STR_PAD_RIGHT); }
+		);
 	}
 
 	public function assign ($modifier, $callback)
@@ -94,7 +119,7 @@ class Locale
 			if (!isset ($this->formatters[$key]))
 				throw new FormatException ('unknown formatter');
 
-			return $this->apply ($this->formatters[$key], $params);
+			return (string)$this->apply ($this->formatters[$key], $params);
 		}
 		catch (FormatException $exception)
 		{
@@ -104,8 +129,7 @@ class Locale
 
 	private function apply ($chunks, $params)
 	{
-		$null = null;
-		$out = '';
+		$out = null;
 
 		foreach ($chunks as $chunk)
 		{
@@ -120,7 +144,10 @@ class Locale
 					foreach ($chunk[2] as $argument)
 						$arguments[] = $this->apply ($argument, $params);
 
-					$out .= call_user_func_array ($this->modifiers[$chunk[1]], $arguments);
+					$result = call_user_func_array ($this->modifiers[$chunk[1]], $arguments);
+
+					if ($result !== null)
+						$out .= (string)$result;
 
 					break;
 
@@ -135,13 +162,13 @@ class Locale
 							$source =& $array[$member];
 						else
 						{
-							$source =& $null;
+							unset ($source);
 
 							break;
 						}
 					}
 
-					if ($source !== null)
+					if (isset ($source))
 						$out .= (string)$source;
 
 					break;

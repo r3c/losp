@@ -27,28 +27,6 @@ sum of its arguments.
 Variable values or result of modifiers can be used as arguments to other
 modifiers: {if:{a},{if:{b},{c}}}
 
-Available modifiers are:
-
-- {calc:lhs,op,rhs,format}: evaluate result of binary operator on the
-    two given operands. Result can be formatted using default Python string
-	formats.
-- {case:value,match1,result1,match2,result2,...,default}: match input value
-    with a list of constants, and return matched result or use default value.
-- {date:datetime,format}: convert input datetime to string using given format.
-- {if:value,iftrue,iffalse}: return "iftrue" if value is set, "iffalse" else.
-    Parameter "iffalse" is optional, empty string is used by default.
-- {ifeq:a,b,iftrue,iffalse}: return iftrue if a equals b, iffalse else
-	Parameter "iffalse" is optional, empty string is used by default.
-    Same modifiers are available for other comparison types:
-    - ifge (greater or equal)
-    - ifgt (greater than),
-    - ifle (lower or equal)
-    - iflt (lower than)
-    - ifne (not equal)
-- {pad:input,width,char}: pad input string up to "abs(width)" characters by
-    reapeating "char" as many times as needed after (or before, if "width" is
-	negative) it. Parameter "char" is optional, space is used by default.
-
 -->
 
 <locale language="fr">	
@@ -75,5 +53,15 @@ Available modifiers are:
 
 	<section prefix="alias.">
 		<string key="02" alias="test.02" />
+	</section>
+
+	<section prefix="modifier.">
+		<string key="case.01">{case:{value},1,Un,2,Deux}</string>
+		<string key="case.02">{case:{value},1,Un,2,Deux,Autre}</string>
+		<string key="def.01">{def:{value},default}</string>
+		<string key="if.01">{if:{condition},Vrai,Faux}</string>
+		<string key="ifset.01">{ifset:{condition},Vrai,Faux}</string>
+		<string key="pad.01">{pad:{string},8,-}</string>
+		<string key="pad.02">{pad:{string},-8,-}</string>
 	</section>
 </locale>
