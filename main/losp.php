@@ -81,6 +81,7 @@ class Locale
 		$this->formatters = $formatters;
 		$this->modifiers = array
 		(
+			'add'	=> function ($lhs, $rhs) { return $lhs + $rhs; },
 			'case'	=> function ($value)
 			{
 				$pairs = array_slice (func_get_args (), 1);
@@ -95,6 +96,7 @@ class Locale
 			},
 			'date'	=> function ($time, $format) { return date ($format, $time); },
 			'def'	=> function ($value, $default) { return $value ?: $default; },
+			'div'	=> function ($lhs, $rhs) { return (int)($lhs / $rhs); },
 			'eq'	=> function ($lhs, $rhs, $true = '1', $false = null) { return $lhs == $rhs ? $true : $false; },
 			'ge'	=> function ($lhs, $rhs, $true = '1', $false = null) { return $lhs >= $rhs ? $true : $false; },
 			'gt'	=> function ($lhs, $rhs, $true = '1', $false = null) { return $lhs > $rhs ? $true : $false; },
@@ -102,8 +104,11 @@ class Locale
 			'ifset'	=> function ($condition, $true = '1', $false = null) { return $condition !== null ? $true : $false; },
 			'le'	=> function ($lhs, $rhs, $true = '1', $false = null) { return $lhs <= $rhs ? $true : $false; },
 			'lt'	=> function ($lhs, $rhs, $true = '1', $false = null) { return $lhs < $rhs ? $true : $false; },
+			'mod'	=> function ($lhs, $rhs) { return $lhs % $rhs; },
+			'mul'	=> function ($lhs, $rhs) { return $lhs * $rhs; },
 			'ne'	=> function ($lhs, $rhs, $true = '1', $false = null) { return $lhs != $rhs ? $true : $false; },
-			'pad'	=> function ($string, $length, $char = ' ') { return str_pad ($string, abs ($length), $char, $length < 0 ? STR_PAD_LEFT : STR_PAD_RIGHT); }
+			'pad'	=> function ($string, $length, $char = ' ') { return str_pad ($string, abs ($length), $char, $length < 0 ? STR_PAD_LEFT : STR_PAD_RIGHT); },
+			'sub'	=> function ($lhs, $rhs) { return $lhs - $rhs; }
 		);
 	}
 

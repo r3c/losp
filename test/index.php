@@ -40,6 +40,8 @@ assert ($losp->format ('alias.01') === 'Bonjour sire ! Il fait beau, mais frais,
 assert ($losp->format ('alias.02', array ('count' => 3)) === 'Vous avez 3 nouveau(x) message(s)');
 
 // Test modifiers
+assert ($losp->format ('modifier.add.01', array ('lhs' => 1, 'rhs' => 3)) === '4');
+assert ($losp->format ('modifier.add.01', array ('lhs' => 5, 'rhs' => -9)) === '-4');
 assert ($losp->format ('modifier.case.01', array ('value' => 1)) === 'Un');
 assert ($losp->format ('modifier.case.01', array ('value' => 2)) === 'Deux');
 assert ($losp->format ('modifier.case.01', array ('value' => 3)) === '');
@@ -48,16 +50,24 @@ assert ($losp->format ('modifier.case.02', array ('value' => 2)) === 'Deux');
 assert ($losp->format ('modifier.case.02', array ('value' => 3)) === 'Autre');
 assert ($losp->format ('modifier.def.01', array ('value' => '')) === 'default');
 assert ($losp->format ('modifier.def.01', array ('value' => '1')) === '1');
+assert ($losp->format ('modifier.div.01', array ('lhs' => 6, 'rhs' => 2)) === '3');
+assert ($losp->format ('modifier.div.01', array ('lhs' => 5, 'rhs' => 2)) === '2');
 assert ($losp->format ('modifier.if.01', array ('condition' => null)) === 'Faux');
 assert ($losp->format ('modifier.if.01', array ('condition' => '0')) === 'Faux');
 assert ($losp->format ('modifier.if.01', array ('condition' => '1')) === 'Vrai');
 assert ($losp->format ('modifier.ifset.01', array ('condition' => null)) === 'Faux');
 assert ($losp->format ('modifier.ifset.01', array ('condition' => '0')) === 'Vrai');
 assert ($losp->format ('modifier.ifset.01', array ('condition' => '1')) === 'Vrai');
+assert ($losp->format ('modifier.mod.01', array ('lhs' => 6, 'rhs' => 2)) === '0');
+assert ($losp->format ('modifier.mod.01', array ('lhs' => 5, 'rhs' => 2)) === '1');
+assert ($losp->format ('modifier.mul.01', array ('lhs' => 3, 'rhs' => 4)) === '12');
+assert ($losp->format ('modifier.mul.01', array ('lhs' => 5, 'rhs' => -2)) === '-10');
 assert ($losp->format ('modifier.pad.01', array ('string' => 'ABCDEF')) === 'ABCDEF--');
 assert ($losp->format ('modifier.pad.01', array ('string' => 'ABCDEFGH')) === 'ABCDEFGH');
 assert ($losp->format ('modifier.pad.02', array ('string' => 'ABCD')) === '----ABCD');
 assert ($losp->format ('modifier.pad.02', array ('string' => 'AB')) === '------AB');
+assert ($losp->format ('modifier.sub.01', array ('lhs' => 1, 'rhs' => 3)) === '-2');
+assert ($losp->format ('modifier.sub.01', array ('lhs' => 5, 'rhs' => 2)) === '3');
 
 // Test formatting errors
 assert_throw (function () use ($losp) { $losp->format ('error.formatter'); }, '/unknown formatter.*error\.formatter/');

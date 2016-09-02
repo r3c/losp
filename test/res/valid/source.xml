@@ -56,12 +56,17 @@ modifiers: {if:{a},{if:{b},{c}}}
 	</section>
 
 	<section prefix="modifier.">
+		<string key="add.01">{add:{lhs},{rhs}}</string>
 		<string key="case.01">{case:{value},1,Un,2,Deux}</string>
 		<string key="case.02">{case:{value},1,Un,2,Deux,Autre}</string>
 		<string key="def.01">{def:{value},default}</string>
+		<string key="div.01">{div:{lhs},{rhs}}</string>
 		<string key="if.01">{if:{condition},Vrai,Faux}</string>
 		<string key="ifset.01">{ifset:{condition},Vrai,Faux}</string>
+		<string key="mod.01">{mod:{lhs},{rhs}}</string>
+		<string key="mul.01">{mul:{lhs},{rhs}}</string>
 		<string key="pad.01">{pad:{string},8,-}</string>
 		<string key="pad.02">{pad:{string},-8,-}</string>
+		<string key="sub.01">{sub:{lhs},{rhs}}</string>
 	</section>
 </locale>
