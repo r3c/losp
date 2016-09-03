@@ -6,7 +6,7 @@
 
 namespace Losp;
 
-define ('LOSP', '1.0.0.0');
+define ('LOSP', '1.0.0.1');
 
 class FormatException extends \Exception
 {
@@ -28,6 +28,7 @@ class ParseException extends \Exception
 
 class Locale
 {
+	const ENCODING = 'UTF-8';
 	const ESCAPE = '\\';
 	const EVALUATOR_BEGIN = '{';
 	const EVALUATOR_END = '}';
@@ -146,8 +147,8 @@ class Locale
 
 					$arguments = array ();
 
-					foreach ($chunk[2] as $argument)
-						$arguments[] = $this->apply ($argument, $params);
+					for ($i = 2; $i < count ($chunk); ++$i)
+						$arguments[] = $this->apply ($chunk[$i], $params);
 
 					$result = call_user_func_array ($this->modifiers[$chunk[1]], $arguments);
 
@@ -159,12 +160,12 @@ class Locale
 				case self::TYPE_VARIABLE:
 					$source =& $params;
 
-					foreach ($chunk[1] as $member)
+					for ($i = 1; $i < count ($chunk); ++$i)
 					{
 						$array = (array)$source;
 
-						if (isset ($array[$member]))
-							$source =& $array[$member];
+						if (isset ($array[$chunk[$i]]))
+							$source =& $array[$chunk[$i]];
 						else
 						{
 							unset ($source);
@@ -263,6 +264,7 @@ class Locale
 
 		while ($index < $length && ($outer || ($string[$index] !== self::EVALUATOR_END && $string[$index] !== self::MODIFIER_NEXT)))
 		{
+			// Found modifier or variable, parse name
 			if ($string[$index] === self::EVALUATOR_BEGIN)
 			{
 				// Parse modifier or variable name
@@ -275,13 +277,13 @@ class Locale
 					// Flush pending plain string if any
 					if ($plain !== '')
 					{
-						$chunks[] = array (self::TYPE_PLAIN, mb_convert_encoding ($plain, $encoding, 'UTF-8'));
+						$chunks[] = array (self::TYPE_PLAIN, mb_convert_encoding ($plain, $encoding, self::ENCODING));
 						$plain = '';
 					}
 
 					$name = substr ($string, $index + 1, $i - $index - 1);
 
-					// Was a modifier, parse arguments
+					// Found modifier, parse arguments
 					if ($string[$i] === self::MODIFIER_DECLARE)
 					{
 						$arguments = array ();
@@ -299,10 +301,10 @@ class Locale
 							$arguments[] = self::parse ($encoding, $string, false, $i);
 						}
 
-						// Append modifier expression
+						// Was a modifier, append to chunks
 						if ($i < $length && $string[$i] === self::EVALUATOR_END)
 						{
-							$chunks[] = array (self::TYPE_MODIFIER, $name, $arguments);
+							$chunks[] = array_merge (array (self::TYPE_MODIFIER, $name), $arguments);
 							$index = $i + 1;
 						}
 
@@ -311,10 +313,10 @@ class Locale
 							$plain .= $string[$index++];
 					}
 
-					// Was a value, append variable expression
+					// Was a value, append to chunks
 					else
 					{
-						$chunks[] = array (self::TYPE_VARIABLE, explode ('.', $name));
+						$chunks[] = array_merge (array (self::TYPE_VARIABLE), explode ('.', $name));
 						$index = $i + 1;
 					}
 				}
@@ -334,7 +336,7 @@ class Locale
 
 		// Flush remaining characters
 		if ($plain !== '')
-			$chunks[] = array (self::TYPE_PLAIN, mb_convert_encoding ($plain, $encoding, 'UTF-8'));
+			$chunks[] = array (self::TYPE_PLAIN, mb_convert_encoding ($plain, $encoding, self::ENCODING));
 
 		return $chunks;
 	}
