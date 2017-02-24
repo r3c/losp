@@ -60,6 +60,7 @@ modifiers: {if:{a},{if:{b},{c}}}
 		<string key="case.01">{case:{value},1,Un,2,Deux}</string>
 		<string key="case.02">{case:{value},1,Un,2,Deux,Autre}</string>
 		<string key="def.01">{def:{value},default}</string>
+		<string key="def.02">{def:{v1},{v2},default}</string>
 		<string key="div.01">{div:{lhs},{rhs}}</string>
 		<string key="if.01">{if:{condition},Vrai,Faux}</string>
 		<string key="ifset.01">{ifset:{condition},Vrai,Faux}</string>

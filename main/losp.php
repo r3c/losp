@@ -85,9 +85,9 @@ class Locale
 			'add'	=> function ($lhs, $rhs) { return $lhs + $rhs; },
 			'case'	=> function ($value)
 			{
-				$pairs = array_slice (func_get_args (), 1);
+				$pairs = func_get_args ();
 
-				for ($i = 0; $i + 1 < count ($pairs); $i += 2)
+				for ($i = 1; $i + 1 < count ($pairs); $i += 2)
 				{
 					if ($pairs[$i] == $value)
 						return $pairs[$i + 1];
@@ -96,7 +96,15 @@ class Locale
 				return $i < count ($pairs) ? $pairs[$i] : null;
 			},
 			'date'	=> function ($time, $format) { return date ($format, $time); },
-			'def'	=> function ($value, $default) { return $value ?: $default; },
+			'def'	=> function ()
+			{
+				$args = func_get_args ();
+
+				for ($i = 0; $i + 1 < count ($args) && !$args[$i]; )
+					++$i;
+
+				return $i < count ($args) ? $args[$i] : null;
+			},
 			'div'	=> function ($lhs, $rhs) { return (int)($lhs / $rhs); },
 			'eq'	=> function ($lhs, $rhs, $true = '1', $false = null) { return $lhs == $rhs ? $true : $false; },
 			'ge'	=> function ($lhs, $rhs, $true = '1', $false = null) { return $lhs >= $rhs ? $true : $false; },
