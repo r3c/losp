@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<locale language="en">
+	<string key="dupe">A</string>
+	<string key="dupe">B</string>
+</locale>

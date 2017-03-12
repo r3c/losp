@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<locale language="en">
+	<string key="ref">Using variable {a}</string>
+	<string key="test" alias="ref">
+		<var name="b" />
+	</string>
+</locale>

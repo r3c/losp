@@ -8,6 +8,14 @@ namespace Losp;
 
 define ('LOSP', '1.0.0.1');
 
+class AliasException extends \Exception
+{
+	public function __construct ($message)
+	{
+		parent::__construct ($message);
+	}
+}
+
 class FormatException extends \Exception
 {
 	public function __construct ($message)
@@ -56,12 +64,21 @@ class Locale
 			self::convert ($formatters, $references, $encoding, $language, $source);
 
 			// Resolve aliased references
-			foreach ($references as $target => $reference)
+			foreach ($references as $alias => $pair)
 			{
-				if (!isset ($formatters[$reference]))
-					throw new \Exception ('invalid reference to key "' . $reference . '" for alias "' . $target . '"');
+				list ($reference, $variables) = $pair;
 
-				$formatters[$target] = $formatters[$reference];
+				if (!isset ($formatters[$reference]))
+					throw new \Exception ('invalid alias "' . $alias . '" to unknown key "' . $reference . '"');
+
+				try
+				{
+					$formatters[$alias] = self::alias ($formatters[$reference], $variables);
+				}
+				catch (AliasException $exception)
+				{
+					throw new \Exception ($exception->getMessage () . ' in alias "' . $alias . '" to key "' . $reference . '"');
+				}
 			}
 
 			// Save to cache
@@ -121,11 +138,25 @@ class Locale
 		);
 	}
 
-	public function assign ($modifier, $callback)
+	/*
+	** Register or remove new modifier by name.
+	** $modifier:	modifier name
+	** $callback:	optional modifier callback, erase modifier if undefined
+	*/
+	public function assign ($modifier, $callback = null)
 	{
-		$this->modifiers[$modifier] = $callback;
+		if ($callback !== null)
+			$this->modifiers[$modifier] = $callback;
+		else
+			unset ($this->modifiers[$modifier]);
 	}
 
+	/*
+	** Format string matching given key using specified parameters.
+	** $key:	string key
+	** $params:	optional parameters
+	** return:	formatted string
+	*/
 	public function format ($key, $params = null)
 	{
 		try
@@ -197,6 +228,89 @@ class Locale
 		return $out;
 	}
 
+	private static function alias ($chunks, $variables)
+	{
+		foreach ($variables as $name => $value)
+		{
+			$found = false;
+
+			foreach ($chunks as $i => $chunk)
+			{
+				if ($chunk[0] === self::TYPE_VARIABLE && $chunk[1] === $name)
+				{
+					array_splice ($chunks, $i, 1, $value);
+
+					$found = true;
+
+					break;
+				}
+			}
+
+			if (!$found)
+				throw new AliasException ('no variable "' . $name . '" to remap');
+		}
+
+		return $chunks;
+	}
+
+	private static function	browse ($nodes, $encoding, $prefix, &$formatters, &$references)
+	{
+		foreach ($nodes as $node)
+		{
+			if ($node->nodeType === XML_TEXT_NODE && trim ($node->nodeValue) === '')
+				continue;
+
+			switch ($node->nodeName)
+			{
+				case 'section':
+					if (!$node->hasAttribute ('prefix'))
+						throw new ParseException ($node, 'section node is missing "prefix" attribute');
+
+					self::browse ($node->childNodes, $encoding, $prefix . $node->getAttribute ('prefix'), $formatters, $references);
+
+					break;
+
+				case 'string':
+					if (!$node->hasAttribute ('key'))
+						throw new ParseException ($node, 'string node is missing "key" attribute');
+
+					$key = $prefix . $node->getAttribute ('key');
+
+					if (isset ($formatters[$key]))
+						throw new ParseException ($node, 'string node has duplicated key "' . $key . '"');
+
+					if ($node->hasAttribute ('alias'))
+					{
+						$variables = array ();
+
+						foreach ($node->childNodes as $var)
+						{
+							if ($var->nodeType === XML_TEXT_NODE && trim ($var->nodeValue) === '')
+								continue;
+
+							if ($var->nodeName !== 'var')
+								throw new  ParseException ($var, 'node name must be "var"');
+
+							if (!$var->hasAttribute ('name'))
+								throw new ParseException ($var, 'var node is missing "name" attribute');
+
+							$variables[$var->getAttribute ('name')] = self::parse ($encoding, $var->nodeValue, true);
+						}
+
+						$formatters[$key] = array ();
+						$references[$key] = array ($node->getAttribute ('alias'), $variables);
+					}
+					else
+						$formatters[$key] = self::parse ($encoding, $node->nodeValue, true);
+
+					break;
+
+				default:
+					throw new ParseException ($node, 'unknown node "' . $node->nodeName . '"');
+			}
+		}
+	}
+
 	private static function	convert (&$formatters, &$references, $encoding, $language, $path)
 	{
 		// Recurse into directory
@@ -228,16 +342,13 @@ class Locale
 		if ($locale->getAttribute ('language') !== $language)
 			return;
 
-		foreach ($locale->childNodes as $child)
+		try
 		{
-			try
-			{
-				self::read ($formatters, $references, $encoding, $child, '');
-			}
-			catch (ParseException $exception)
-			{
-				throw new \Exception ($exception->getMessage () . ' in file "' . $path . '" at line ' . $exception->node->getLineNo ());
-			}
+			self::browse ($locale->childNodes, $encoding, '', $formatters, $references);
+		}
+		catch (ParseException $exception)
+		{
+			throw new \Exception ($exception->getMessage () . ' in file "' . $path . '" at line ' . $exception->node->getLineNo ());
 		}
 	}
 
@@ -264,13 +375,13 @@ class Locale
 		return var_export ($input, true);
 	}
 
-	private static function parse ($encoding, $string, $outer, &$index)
+	private static function parse ($encoding, $string, $outermost, &$index = 0)
 	{
 		$chunks = array ();
 		$length = strlen ($string);
 		$plain = '';
 
-		while ($index < $length && ($outer || ($string[$index] !== self::EVALUATOR_END && $string[$index] !== self::MODIFIER_NEXT)))
+		while ($index < $length && ($outermost || ($string[$index] !== self::EVALUATOR_END && $string[$index] !== self::MODIFIER_NEXT)))
 		{
 			// Found modifier or variable, parse name
 			if ($string[$index] === self::EVALUATOR_BEGIN)
@@ -347,40 +458,6 @@ class Locale
 			$chunks[] = array (self::TYPE_PLAIN, mb_convert_encoding ($plain, $encoding, self::ENCODING));
 
 		return $chunks;
-	}
-
-	private static function	read (&$formatters, &$references, $encoding, $node, $prefix)
-	{
-		if ($node->nodeType !== XML_ELEMENT_NODE)
-			return;
-
-		switch ($node->nodeName)
-		{
-			case 'section':
-				$prefix .= $node->getAttribute ('prefix');
-
-				foreach ($node->childNodes as $child)
-					self::read ($formatters, $references, $encoding, $child, $prefix);
-
-				break;
-
-			case 'string':
-				if (!$node->hasAttribute ('key'))
-					throw new ParseException ($node, 'missing "key" attribute');
-
-				$key = $prefix . $node->getAttribute ('key');
-
-				if ($node->hasAttribute ('alias'))
-					$references[$key] = $node->getAttribute ('alias');
-				else
-				{
-					$i = 0;
-
-					$formatters[$key] = self::parse ($encoding, $node->nodeValue, true, $i);
-				}
-
-				break;
-		}
 	}
 }
 

@@ -35,30 +35,46 @@ modifiers: {if:{a},{if:{b},{c}}}
 	</section>
 
 	<section prefix="alias.">
-		<string key="01" alias="test.01" />
+		<string key="basic.early" alias="plain.01" />
 	</section>
 
-	<section prefix="test.">
-		<string key="01">Bonjour sire ! Il fait beau, mais frais, mais beau !</string>
-		<string key="02">Vous avez {count} nouveau(x) message(s)</string>
-		<string key="03">Modifier le compte '{account.name}'</string>
-		<string key="04">Nous sommes le {date:{today},d/m/y}</string>
-		<string key="05">Vous avez {count} {if:{gt:{count},1},nouveaux messages,nouveau message}, avec accord s'il vous plait !</string>
-		<string key="06">{a} cochon{if:{gt:{a},1},s}, {b} poule{if:{gt:{b},1},s}, accordé{if:{gt:{add:{a},{b}},1},s} également</string>
-		<string key="07">Nombre de visites: {pad:{count},-8,0} (mais on prévoit 8 caractères, au cas où)</string>
-		<string key="08">{pad:À gauche,20,#}, des canapés !</string>
-		<string key="09">{pad:À droite,-20,#}, des canapés !</string>
-		<string key="10">La réponse est {x.y.z}</string>
+	<section prefix="plain.">
+		<string key="01">Hello, World!</string>
+		<string key="02">Bonjour sire ! Il fait beau, mais frais, mais beau !</string>
+	</section>
+
+	<section prefix="variable.">
+		<string key="double">Variables {a} et {b}</string>
+		<string key="single">Vous avez {count} nouveau(x) message(s)</string>
+		<string key="nested.01">Modifier le compte '{account.name}'</string>
+		<string key="nested.02">La réponse est {x.y.z}</string>
+		<string key="occurrence">Vous avez {count} {if:{gt:{count},1},nouveaux messages,nouveau message}, avec accord s'il vous plait !</string>
+		<string key="rich">{a} cochon{if:{gt:{a},1},s}, {b} poule{if:{gt:{b},1},s}, accordé{if:{gt:{add:{a},{b}},1},s} également</string>
 	</section>
 
 	<section prefix="alias.">
-		<string key="02" alias="test.02" />
+		<string key="basic.late" alias="plain.02" />
+		<string key="basic.variable" alias="variable.single" />
+		<string key="remap.complex" alias="variable.single">
+			<var name="count">A{var}C</var>
+		</string>
+		<string key="remap.constant" alias="variable.single">
+			<var name="count">59</var>
+		</string>
+		<string key="remap.multiple" alias="variable.double">
+			<var name="a">X</var>
+			<var name="b">Y</var>
+		</string>
+		<string key="remap.variable" alias="variable.single">
+			<var name="count">{other}</var>
+		</string>
 	</section>
 
 	<section prefix="modifier.">
 		<string key="add.01">{add:{lhs},{rhs}}</string>
 		<string key="case.01">{case:{value},1,Un,2,Deux}</string>
 		<string key="case.02">{case:{value},1,Un,2,Deux,Autre}</string>
+		<string key="date.01">Nous sommes le {date:{today},d/m/y}</string>
 		<string key="def.01">{def:{value},default}</string>
 		<string key="def.02">{def:{v1},{v2},default}</string>
 		<string key="div.01">{div:{lhs},{rhs}}</string>
