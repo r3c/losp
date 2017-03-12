@@ -48,8 +48,8 @@ modifiers: {if:{a},{if:{b},{c}}}
 		<string key="single">Vous avez {count} nouveau(x) message(s)</string>
 		<string key="nested.01">Modifier le compte '{account.name}'</string>
 		<string key="nested.02">La réponse est {x.y.z}</string>
-		<string key="occurrence">Vous avez {count} {if:{gt:{count},1},nouveaux messages,nouveau message}, avec accord s'il vous plait !</string>
 		<string key="rich">{a} cochon{if:{gt:{a},1},s}, {b} poule{if:{gt:{b},1},s}, accordé{if:{gt:{add:{a},{b}},1},s} également</string>
+		<string key="twice">Vous avez {count} {if:{gt:{count},1},nouveaux messages,nouveau message}, avec accord s'il vous plait !</string>
 	</section>
 
 	<section prefix="alias.">
@@ -64,6 +64,9 @@ modifiers: {if:{a},{if:{b},{c}}}
 		<string key="remap.multiple" alias="variable.double">
 			<var name="a">X</var>
 			<var name="b">Y</var>
+		</string>
+		<string key="remap.twice" alias="variable.twice">
+			<var name="count">3</var>
 		</string>
 		<string key="remap.variable" alias="variable.single">
 			<var name="count">{other}</var>

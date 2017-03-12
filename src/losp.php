@@ -8,14 +8,6 @@ namespace Losp;
 
 define ('LOSP', '1.0.0.1');
 
-class AliasException extends \Exception
-{
-	public function __construct ($message)
-	{
-		parent::__construct ($message);
-	}
-}
-
 class FormatException extends \Exception
 {
 	public function __construct ($message)
@@ -66,18 +58,17 @@ class Locale
 			// Resolve aliased references
 			foreach ($references as $alias => $pair)
 			{
-				list ($reference, $variables) = $pair;
+				list ($reference, $substitutes) = $pair;
 
 				if (!isset ($formatters[$reference]))
 					throw new \Exception ('invalid alias "' . $alias . '" to unknown key "' . $reference . '"');
 
-				try
+				$formatters[$alias] = $formatters[$reference];
+
+				foreach ($substitutes as $name => $replacements)
 				{
-					$formatters[$alias] = self::alias ($formatters[$reference], $variables);
-				}
-				catch (AliasException $exception)
-				{
-					throw new \Exception ($exception->getMessage () . ' in alias "' . $alias . '" to key "' . $reference . '"');
+					if (!self::substitute ($formatters[$alias], $name, $replacements))
+						throw new \Exception ('no variable "' . $name . '" to remap in alias "' . $alias . '" to key "' . $reference . '"');
 				}
 			}
 
@@ -228,31 +219,6 @@ class Locale
 		return $out;
 	}
 
-	private static function alias ($chunks, $variables)
-	{
-		foreach ($variables as $name => $value)
-		{
-			$found = false;
-
-			foreach ($chunks as $i => $chunk)
-			{
-				if ($chunk[0] === self::TYPE_VARIABLE && $chunk[1] === $name)
-				{
-					array_splice ($chunks, $i, 1, $value);
-
-					$found = true;
-
-					break;
-				}
-			}
-
-			if (!$found)
-				throw new AliasException ('no variable "' . $name . '" to remap');
-		}
-
-		return $chunks;
-	}
-
 	private static function	browse ($nodes, $encoding, $prefix, &$formatters, &$references)
 	{
 		foreach ($nodes as $node)
@@ -281,7 +247,7 @@ class Locale
 
 					if ($node->hasAttribute ('alias'))
 					{
-						$variables = array ();
+						$substitutes = array ();
 
 						foreach ($node->childNodes as $var)
 						{
@@ -294,11 +260,11 @@ class Locale
 							if (!$var->hasAttribute ('name'))
 								throw new ParseException ($var, 'var node is missing "name" attribute');
 
-							$variables[$var->getAttribute ('name')] = self::parse ($encoding, $var->nodeValue, true);
+							$substitutes[$var->getAttribute ('name')] = self::parse ($encoding, $var->nodeValue, true);
 						}
 
 						$formatters[$key] = array ();
-						$references[$key] = array ($node->getAttribute ('alias'), $variables);
+						$references[$key] = array ($node->getAttribute ('alias'), $substitutes);
 					}
 					else
 						$formatters[$key] = self::parse ($encoding, $node->nodeValue, true);
@@ -458,6 +424,36 @@ class Locale
 			$chunks[] = array (self::TYPE_PLAIN, mb_convert_encoding ($plain, $encoding, self::ENCODING));
 
 		return $chunks;
+	}
+
+	private static function substitute (&$chunks, $name, $replacements)
+	{
+		$found = false;
+
+		for ($i = 0; $i < count ($chunks); ++$i)
+		{
+			switch ($chunks[$i][0])
+			{
+				case self::TYPE_MODIFIER:
+					for ($j = 2; $j < count ($chunks[$i]); ++$j)
+						$found = self::substitute ($chunks[$i][$j], $name, $replacements) || $found;
+
+					break;
+
+				case self::TYPE_VARIABLE:
+					if ($chunks[$i][1] === $name)
+					{
+						array_splice ($chunks, $i, 1, $replacements);
+
+						$found = true;
+						$i += count ($replacements) - 1;
+					}
+
+					break;
+			}
+		}
+
+		return $found;
 	}
 }
 

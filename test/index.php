@@ -24,12 +24,12 @@ assert ($losp->format ('plain.01') === 'Hello, World!');
 assert ($losp->format ('plain.02') === 'Bonjour sire ! Il fait beau, mais frais, mais beau !');
 
 // Test strings with variables
-assert ($losp->format ('variable.double', array ('a' => 'A', 'b' => 'B')) === 'Variables A et B');
 assert ($losp->format ('variable.single', array ('count' => 3)) === 'Vous avez 3 nouveau(x) message(s)');
+assert ($losp->format ('variable.double', array ('a' => 'A', 'b' => 'B')) === 'Variables A et B');
 assert ($losp->format ('variable.nested.01', array ('account' => array ('name' => 'Admin'))) === 'Modifier le compte \'Admin\'');
 assert ($losp->format ('variable.nested.02', array ('x' => array ('y' => array ('z' => 42)))) === 'La réponse est 42');
-assert ($losp->format ('variable.occurrence', array ('count' => 1)) === 'Vous avez 1 nouveau message, avec accord s\'il vous plait !');
-assert ($losp->format ('variable.occurrence', array ('count' => 2)) === 'Vous avez 2 nouveaux messages, avec accord s\'il vous plait !');
+assert ($losp->format ('variable.twice', array ('count' => 1)) === 'Vous avez 1 nouveau message, avec accord s\'il vous plait !');
+assert ($losp->format ('variable.twice', array ('count' => 2)) === 'Vous avez 2 nouveaux messages, avec accord s\'il vous plait !');
 assert ($losp->format ('variable.rich', array ('a' => 0, 'b' => 1)) === '0 cochon, 1 poule, accordé également');
 assert ($losp->format ('variable.rich', array ('a' => 1, 'b' => 0)) === '1 cochon, 0 poule, accordé également');
 assert ($losp->format ('variable.rich', array ('a' => 1, 'b' => 1)) === '1 cochon, 1 poule, accordés également');
@@ -42,6 +42,7 @@ assert ($losp->format ('alias.basic.variable', array ('count' => 3)) === 'Vous a
 assert ($losp->format ('alias.remap.complex', array ('var' => 'B')) === 'Vous avez ABC nouveau(x) message(s)');
 assert ($losp->format ('alias.remap.constant') === 'Vous avez 59 nouveau(x) message(s)');
 assert ($losp->format ('alias.remap.multiple') === 'Variables X et Y');
+assert ($losp->format ('alias.remap.twice') === 'Vous avez 3 nouveaux messages, avec accord s\'il vous plait !');
 assert ($losp->format ('alias.remap.variable', array ('other' => '17')) === 'Vous avez 17 nouveau(x) message(s)');
 
 // Test modifiers
