@@ -1,6 +1,6 @@
 <?php
 
-require ('../main/losp.php');
+require ('../src/losp.php');
 
 function assert_throw ($callback, $pattern)
 {
