@@ -224,7 +224,8 @@ class Locale
 	{
 		foreach ($nodes as $node)
 		{
-			if ($node->nodeType === XML_TEXT_NODE && trim ($node->nodeValue) === '')
+			if (($node->nodeType === XML_COMMENT_NODE)
+			 || ($node->nodeType === XML_TEXT_NODE && trim ($node->nodeValue) === ''))
 				continue;
 
 			switch ($node->nodeName)
@@ -252,7 +253,8 @@ class Locale
 
 						foreach ($node->childNodes as $var)
 						{
-							if ($var->nodeType === XML_TEXT_NODE && trim ($var->nodeValue) === '')
+							if (($var->nodeType === XML_COMMENT_NODE)
+							 || ($var->nodeType === XML_TEXT_NODE && trim ($var->nodeValue) === ''))
 								continue;
 
 							if ($var->nodeName !== 'var')

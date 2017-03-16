@@ -29,20 +29,24 @@ modifiers: {if:{a},{if:{b},{c}}}
 
 -->
 
-<locale language="fr">	
+<locale language="fr">
+	<!-- Runtime errors -->
 	<section prefix="error.">
 		<string key="modifier">Invalid {modifier:1} found</string>
 	</section>
 
+	<!-- Alises -->
 	<section prefix="alias.">
 		<string key="basic.early" alias="plain.01" />
 	</section>
 
+	<!-- Plain text -->
 	<section prefix="plain.">
 		<string key="01">Hello, World!</string>
 		<string key="02">Bonjour sire ! Il fait beau, mais frais, mais beau !</string>
 	</section>
 
+	<!-- Variable substitution -->
 	<section prefix="variable.">
 		<string key="double">Variables {a} et {b}</string>
 		<string key="single">Vous avez {count} nouveau(x) message(s)</string>
@@ -53,6 +57,7 @@ modifiers: {if:{a},{if:{b},{c}}}
 		<string key="twice">Vous avez {count} {if:{gt:{count},1},nouveaux messages,nouveau message}, avec accord s'il vous plait !</string>
 	</section>
 
+	<!-- Aliases and remapping -->
 	<section prefix="alias.">
 		<string key="basic.late" alias="plain.02" />
 		<string key="basic.variable" alias="variable.single" />
@@ -63,8 +68,11 @@ modifiers: {if:{a},{if:{b},{c}}}
 			<var name="count">59</var>
 		</string>
 		<string key="remap.multiple" alias="variable.double">
+			<!-- Comment -->
 			<var name="a">X</var>
+			<!-- Comment -->
 			<var name="b">Y</var>
+			<!-- Comment -->
 		</string>
 		<string key="remap.nested.middle" alias="variable.nested.03">
 			<var name="x.y">remap</var>
@@ -80,6 +88,7 @@ modifiers: {if:{a},{if:{b},{c}}}
 		</string>
 	</section>
 
+	<!-- Modifiers -->
 	<section prefix="modifier.">
 		<string key="add.01">{add:{lhs},{rhs}}</string>
 		<string key="case.01">{case:{value},1,Un,2,Deux}</string>
