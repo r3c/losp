@@ -16,6 +16,20 @@ function assert_throw ($callback, $pattern)
 	}
 }
 
+class Container
+{
+	public function __construct ($value, $key, $child)
+	{
+		$this->value = $value;
+		$this->$key = $child;
+	}
+
+	public function __toString ()
+	{
+		return $this->value;
+	}
+}
+
 $losp = new Losp\Locale ('UTF-8', 'fr', 'res/valid');
 $losp->assign ('add', function ($lhs, $rhs) { return $lhs + $rhs; });
 
@@ -28,6 +42,7 @@ assert ($losp->format ('variable.single', array ('count' => 3)) === 'Vous avez 3
 assert ($losp->format ('variable.double', array ('a' => 'A', 'b' => 'B')) === 'Variables A et B');
 assert ($losp->format ('variable.nested.01', array ('account' => array ('name' => 'Admin'))) === 'Modifier le compte \'Admin\'');
 assert ($losp->format ('variable.nested.02', array ('x' => array ('y' => array ('z' => 42)))) === 'La réponse est 42');
+assert ($losp->format ('variable.nested.03', array ('x' => new Container ('xxx', 'y', new Container ('yyy', 'z', 'zzz')))) === 'X = xxx, Y = yyy, Z = zzz');
 assert ($losp->format ('variable.twice', array ('count' => 1)) === 'Vous avez 1 nouveau message, avec accord s\'il vous plait !');
 assert ($losp->format ('variable.twice', array ('count' => 2)) === 'Vous avez 2 nouveaux messages, avec accord s\'il vous plait !');
 assert ($losp->format ('variable.rich', array ('a' => 0, 'b' => 1)) === '0 cochon, 1 poule, accordé également');
@@ -42,6 +57,8 @@ assert ($losp->format ('alias.basic.variable', array ('count' => 3)) === 'Vous a
 assert ($losp->format ('alias.remap.complex', array ('var' => 'B')) === 'Vous avez ABC nouveau(x) message(s)');
 assert ($losp->format ('alias.remap.constant') === 'Vous avez 59 nouveau(x) message(s)');
 assert ($losp->format ('alias.remap.multiple') === 'Variables X et Y');
+assert ($losp->format ('alias.remap.nested.middle', array ('x' => new Container ('xxx', 'y', new Container ('yyy', 'z', 'zzz')))) === 'X = xxx, Y = remap, Z = zzz');
+assert ($losp->format ('alias.remap.nested.tail', array ('account' => array ('name' => 'User'))) === 'Modifier le compte \'Someone\'');
 assert ($losp->format ('alias.remap.twice') === 'Vous avez 3 nouveaux messages, avec accord s\'il vous plait !');
 assert ($losp->format ('alias.remap.variable', array ('other' => '17')) === 'Vous avez 17 nouveau(x) message(s)');
 

@@ -37,6 +37,7 @@ class Locale
 	const TYPE_MODIFIER = 0;
 	const TYPE_PLAIN = 1;
 	const TYPE_VARIABLE = 2;
+	const VARIABLE_FIELD = '.';
 
 	private	$formatters;
 	private	$modifiers;
@@ -67,7 +68,7 @@ class Locale
 
 				foreach ($substitutes as $name => $replacements)
 				{
-					if (!self::substitute ($formatters[$alias], $name, $replacements))
+					if (!self::substitute ($formatters[$alias], explode (self::VARIABLE_FIELD, $name), $replacements))
 						throw new \Exception ('no variable "' . $name . '" to remap in alias "' . $alias . '" to key "' . $reference . '"');
 				}
 			}
@@ -401,7 +402,7 @@ class Locale
 					// Was a value, append to chunks
 					else
 					{
-						$chunks[] = array_merge (array (self::TYPE_VARIABLE), explode ('.', $name));
+						$chunks[] = array_merge (array (self::TYPE_VARIABLE), explode (self::VARIABLE_FIELD, $name));
 						$index = $i + 1;
 					}
 				}
@@ -426,7 +427,7 @@ class Locale
 		return $chunks;
 	}
 
-	private static function substitute (&$chunks, $name, $replacements)
+	private static function substitute (&$chunks, $fields, $replacements)
 	{
 		$found = false;
 
@@ -436,12 +437,12 @@ class Locale
 			{
 				case self::TYPE_MODIFIER:
 					for ($j = 2; $j < count ($chunks[$i]); ++$j)
-						$found = self::substitute ($chunks[$i][$j], $name, $replacements) || $found;
+						$found = self::substitute ($chunks[$i][$j], $fields, $replacements) || $found;
 
 					break;
 
 				case self::TYPE_VARIABLE:
-					if ($chunks[$i][1] === $name)
+					if (array_slice ($chunks[$i], 1) === $fields)
 					{
 						array_splice ($chunks, $i, 1, $replacements);
 
