@@ -40,6 +40,11 @@ modifiers: {if:{a},{if:{b},{c}}}
 		<string key="basic.early" alias="plain.01" />
 	</section>
 
+	<!-- Charset -->
+	<section prefix="charset.">
+		<string key="accent">Àéç©</string>
+	</section>
+
 	<!-- Plain text -->
 	<section prefix="plain.">
 		<string key="01">Hello, World!</string>

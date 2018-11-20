@@ -95,6 +95,13 @@ assert($losp->format('modifier.pad.02', array('string' => 'AB')) === '------AB')
 assert($losp->format('modifier.sub.01', array('lhs' => 1, 'rhs' => 3)) === '-2');
 assert($losp->format('modifier.sub.01', array('lhs' => 5, 'rhs' => 2)) === '3');
 
+// Test charset output
+foreach (array('ISO-8859-1', 'UTF-8') as $charset) {
+    $losp_charset = new Losp\Locale($charset, 'fr', 'res/valid');
+
+    assert($losp_charset->format('charset.accent') === mb_convert_encoding('Àéç©', $charset, 'UTF-8'), "formatting with charset $charset");
+}
+
 // Test formatting errors
 assert_throw(function () use ($losp) {
     $losp->format('error.formatter');
