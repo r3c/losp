@@ -60,6 +60,7 @@ modifiers: {if:{a},{if:{b},{c}}}
 		<string key="nested.03">X = {x}, Y = {x.y}, Z = {x.y.z}</string>
 		<string key="rich">{a} cochon{if:{gt:{a},1},s}, {b} poule{if:{gt:{b},1},s}, accordé{if:{gt:{add:{a},{b}},1},s} également</string>
 		<string key="twice">Vous avez {count} {if:{gt:{count},1},nouveaux messages,nouveau message}, avec accord s'il vous plait !</string>
+		<string key="unknown">{p.known}{p.unknown}{p.known}</string>
 	</section>
 
 	<!-- Aliases and remapping -->

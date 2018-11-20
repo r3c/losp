@@ -228,7 +228,7 @@ class Locale
                                 $source = call_user_func(array($source, $name));
                             } elseif (property_exists($source, $name)) {
                                 $source = $source->$name;
-                            } elseif (isset($source[$name])) {
+                            } elseif ($source instanceof \ArrayAccess && isset($source[$name])) {
                                 $source = $source[$name];
                             } else {
                                 $source = null;

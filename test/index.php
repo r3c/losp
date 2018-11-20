@@ -48,6 +48,7 @@ assert($locale->format('variable.rich', array('a' => 0, 'b' => 1)) === '0 cochon
 assert($locale->format('variable.rich', array('a' => 1, 'b' => 0)) === '1 cochon, 0 poule, accordé également');
 assert($locale->format('variable.rich', array('a' => 1, 'b' => 1)) === '1 cochon, 1 poule, accordés également');
 assert($locale->format('variable.rich', array('a' => 2, 'b' => 2)) === '2 cochons, 2 poules, accordés également');
+assert($locale->format('variable.unknown', array('p' => new Container('', 'known', 'a'))) === 'aa');
 
 // Test aliased strings
 assert($locale->format('alias.basic.early') === 'Hello, World!');
