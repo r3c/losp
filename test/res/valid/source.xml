@@ -98,6 +98,8 @@ modifiers: {if:{a},{if:{b},{c}}}
 		<string key="add.01">{add:{lhs},{rhs}}</string>
 		<string key="case.01">{case:{value},1,Un,2,Deux}</string>
 		<string key="case.02">{case:{value},1,Un,2,Deux,Autre}</string>
+		<string key="custom.01">{custom:cba}</string>
+		<string key="custom.02">{custom:fed,cba}</string>
 		<string key="date.01">Nous sommes le {date:{today},d/m/y}</string>
 		<string key="def.01">{def:{value},default}</string>
 		<string key="def.02">{def:{v1},{v2},default}</string>

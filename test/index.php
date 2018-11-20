@@ -28,8 +28,8 @@ class Container
 }
 
 $losp = new Losp\Locale('UTF-8', 'fr', 'res/valid');
-$losp->assign('add', function ($lhs, $rhs) {
-    return $lhs + $rhs;
+$losp->declare('custom', function ($lhs, $rhs = '') {
+    return strrev($rhs) . strrev($lhs);
 });
 
 // Test plain strings
@@ -70,6 +70,8 @@ assert($losp->format('modifier.case.01', array('value' => 3)) === '');
 assert($losp->format('modifier.case.02', array('value' => 1)) === 'Un');
 assert($losp->format('modifier.case.02', array('value' => 2)) === 'Deux');
 assert($losp->format('modifier.case.02', array('value' => 3)) === 'Autre');
+assert($losp->format('modifier.custom.01') === 'abc');
+assert($losp->format('modifier.custom.02') === 'abcdef');
 assert($losp->format('modifier.date.01', array('today' => 1428229942)) === 'Nous sommes le 05/04/15');
 assert($losp->format('modifier.def.01', array('value' => '')) === 'default');
 assert($losp->format('modifier.def.01', array('value' => '1')) === '1');

@@ -164,7 +164,7 @@ class Locale
     ** $modifier:	modifier name
     ** $callback:	optional modifier callback, erase modifier if undefined
     */
-    public function assign($modifier, $callback = null)
+    public function declare($modifier, $callback = null)
     {
         if ($callback !== null) {
             $this->modifiers[$modifier] = $callback;
