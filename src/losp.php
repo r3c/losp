@@ -1,9 +1,5 @@
 <?php
 
-/*
-** Locale String Pre-processor
-*/
-
 namespace Losp;
 
 define('LOSP', '1.0.0.1');
