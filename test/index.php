@@ -28,7 +28,7 @@ class Container
 }
 
 $locale = new Losp\Locale('UTF-8', 'fr', 'res/valid');
-$locale->declare('custom', function ($lhs, $rhs = '') {
+$locale->assign('custom', function ($lhs, $rhs = '') {
     return strrev($rhs) . strrev($lhs);
 });
 
