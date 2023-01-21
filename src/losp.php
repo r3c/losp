@@ -14,6 +14,8 @@ class FormatException extends \Exception
 
 class ParseException extends \Exception
 {
+    public $node;
+
     public function __construct($node, $message)
     {
         parent::__construct($message);
@@ -87,10 +89,10 @@ class Locale
         // Initalize members
         $this->formatters = $formatters;
         $this->modifiers = array(
-            'add'	=> function ($lhs, $rhs) {
+            'add'    => function ($lhs, $rhs) {
                 return $lhs + $rhs;
             },
-            'case'	=> function ($value) {
+            'case'    => function ($value) {
                 $pairs = func_get_args();
 
                 for ($i = 1; $i + 1 < count($pairs); $i += 2) {
@@ -101,10 +103,10 @@ class Locale
 
                 return $i < count($pairs) ? $pairs[$i] : null;
             },
-            'date'	=> function ($time, $format) {
+            'date'    => function ($time, $format) {
                 return date($format, $time);
             },
-            'def'	=> function () {
+            'def'    => function () {
                 $args = func_get_args();
 
                 for ($i = 0; $i + 1 < count($args) && !$args[$i];) {
@@ -113,43 +115,43 @@ class Locale
 
                 return $i < count($args) ? $args[$i] : null;
             },
-            'div'	=> function ($lhs, $rhs) {
+            'div'    => function ($lhs, $rhs) {
                 return (int)($lhs / $rhs);
             },
-            'eq'	=> function ($lhs, $rhs, $true = '1', $false = null) {
+            'eq'    => function ($lhs, $rhs, $true = '1', $false = null) {
                 return $lhs == $rhs ? $true : $false;
             },
-            'ge'	=> function ($lhs, $rhs, $true = '1', $false = null) {
+            'ge'    => function ($lhs, $rhs, $true = '1', $false = null) {
                 return $lhs >= $rhs ? $true : $false;
             },
-            'gt'	=> function ($lhs, $rhs, $true = '1', $false = null) {
+            'gt'    => function ($lhs, $rhs, $true = '1', $false = null) {
                 return $lhs > $rhs ? $true : $false;
             },
-            'if'	=> function ($condition, $true = '1', $false = null) {
+            'if'    => function ($condition, $true = '1', $false = null) {
                 return $condition ? $true : $false;
             },
-            'ifset'	=> function ($condition, $true = '1', $false = null) {
+            'ifset'    => function ($condition, $true = '1', $false = null) {
                 return $condition !== null ? $true : $false;
             },
-            'le'	=> function ($lhs, $rhs, $true = '1', $false = null) {
+            'le'    => function ($lhs, $rhs, $true = '1', $false = null) {
                 return $lhs <= $rhs ? $true : $false;
             },
-            'lt'	=> function ($lhs, $rhs, $true = '1', $false = null) {
+            'lt'    => function ($lhs, $rhs, $true = '1', $false = null) {
                 return $lhs < $rhs ? $true : $false;
             },
-            'mod'	=> function ($lhs, $rhs) {
+            'mod'    => function ($lhs, $rhs) {
                 return $lhs % $rhs;
             },
-            'mul'	=> function ($lhs, $rhs) {
+            'mul'    => function ($lhs, $rhs) {
                 return $lhs * $rhs;
             },
-            'ne'	=> function ($lhs, $rhs, $true = '1', $false = null) {
+            'ne'    => function ($lhs, $rhs, $true = '1', $false = null) {
                 return $lhs != $rhs ? $true : $false;
             },
-            'pad'	=> function ($string, $length, $char = ' ') {
+            'pad'    => function ($string, $length, $char = ' ') {
                 return str_pad($string, abs($length), $char, $length < 0 ? STR_PAD_LEFT : STR_PAD_RIGHT);
             },
-            'sub'	=> function ($lhs, $rhs) {
+            'sub'    => function ($lhs, $rhs) {
                 return $lhs - $rhs;
             }
         );
@@ -256,7 +258,8 @@ class Locale
     {
         foreach ($nodes as $node) {
             if (($node->nodeType === XML_COMMENT_NODE)
-             || ($node->nodeType === XML_TEXT_NODE && trim($node->nodeValue) === '')) {
+                || ($node->nodeType === XML_TEXT_NODE && trim($node->nodeValue) === '')
+            ) {
                 continue;
             }
 
@@ -286,7 +289,8 @@ class Locale
 
                         foreach ($node->childNodes as $var) {
                             if (($var->nodeType === XML_COMMENT_NODE)
-                             || ($var->nodeType === XML_TEXT_NODE && trim($var->nodeValue) === '')) {
+                                || ($var->nodeType === XML_TEXT_NODE && trim($var->nodeValue) === '')
+                            ) {
                                 continue;
                             }
 
@@ -359,21 +363,23 @@ class Locale
     private static function export($input)
     {
         if (is_array($input)) {
-            $out = '';
-
-            if (array_reduce(array_keys($input), function (&$result, $item) {
+            $accumulator = function ($result, $item) {
                 return $result === $item ? $item + 1 : null;
-            }, 0) !== count($input)) {
+            };
+
+            $output = '';
+
+            if (array_reduce(array_keys($input), $accumulator, 0) !== count($input)) {
                 foreach ($input as $key => $value) {
-                    $out .= ($out !== '' ? ',' : '') . self::export($key) . '=>' . self::export($value);
+                    $output .= ($output !== '' ? ',' : '') . self::export($key) . '=>' . self::export($value);
                 }
             } else {
                 foreach ($input as $value) {
-                    $out .= ($out !== '' ? ',' : '') . self::export($value);
+                    $output .= ($output !== '' ? ',' : '') . self::export($value);
                 }
             }
 
-            return 'array(' . $out . ')';
+            return 'array(' . $output . ')';
         }
 
         return var_export($input, true);
