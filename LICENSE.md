@@ -1,5 +1,4 @@
-Losp license
-============
+# MIT License
 
 Copyright (c) 2018 Remi Caput, http://remi.caput.fr/
 
