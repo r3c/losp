@@ -1,6 +1,6 @@
 <?php
 
-require('../src/losp.php');
+require __DIR__ . '/../src/losp.php';
 
 function assert_throw($callback, $pattern)
 {
@@ -15,6 +15,8 @@ function assert_throw($callback, $pattern)
 
 class Container
 {
+    public $value;
+
     public function __construct($value, $key, $child)
     {
         $this->value = $value;
@@ -27,7 +29,7 @@ class Container
     }
 }
 
-$locale = new Losp\Locale('UTF-8', 'fr', 'res/valid');
+$locale = new Losp\Locale('UTF-8', 'fr', __DIR__ . '/res/valid');
 $locale->assign('custom', function ($lhs, $rhs = '') {
     return strrev($rhs) . strrev($lhs);
 });
@@ -100,7 +102,7 @@ assert($locale->format('modifier.sub.01', array('lhs' => 5, 'rhs' => 2)) === '3'
 
 // Test charset output
 foreach (array('ISO-8859-1', 'UTF-8') as $charset) {
-    $locale_charset = new Losp\Locale($charset, 'fr', 'res/valid');
+    $locale_charset = new Losp\Locale($charset, 'fr', __DIR__ . '/res/valid');
 
     assert($locale_charset->format('charset.accent') === mb_convert_encoding('Àéç©', $charset, 'UTF-8'), "formatting with charset $charset");
 }
@@ -115,29 +117,29 @@ assert_throw(function () use ($locale) {
 
 // Test parsing errors
 assert_throw(function () {
-    new Losp\Locale('UTF-8', 'en', 'res/invalid/alias-reference-duplicate.xml');
+    new Losp\Locale('UTF-8', 'en', __DIR__ . '/res/invalid/alias-reference-duplicate.xml');
 }, '/string node has duplicated key "dupe"/');
 assert_throw(function () {
-    new Losp\Locale('UTF-8', 'en', 'res/invalid/alias-reference-unknown.xml');
+    new Losp\Locale('UTF-8', 'en', __DIR__ . '/res/invalid/alias-reference-unknown.xml');
 }, '/invalid alias "some" to unknown key "string"/');
 assert_throw(function () {
-    new Losp\Locale('UTF-8', 'en', 'res/invalid/alias-variable-unknown.xml');
+    new Losp\Locale('UTF-8', 'en', __DIR__ . '/res/invalid/alias-variable-unknown.xml');
 }, '/no variable "b" to remap in alias "test" to key "ref"/');
 assert_throw(function () {
-    new Losp\Locale('UTF-8', 'fr', 'res/invalid/missing.xml');
+    new Losp\Locale('UTF-8', 'fr', __DIR__ . '/res/invalid/missing.xml');
 }, '/doesn\'t exist/');
 assert_throw(function () {
-    new Losp\Locale('UTF-8', 'fr', 'res/invalid/root-language-missing.xml');
+    new Losp\Locale('UTF-8', 'fr', __DIR__ . '/res/invalid/root-language-missing.xml');
 }, '/missing "language" attribute/');
 assert_throw(function () {
-    new Losp\Locale('UTF-8', 'fr', 'res/invalid/root-name.xml');
+    new Losp\Locale('UTF-8', 'fr', __DIR__ . '/res/invalid/root-name.xml');
 }, '/must be named/');
 assert_throw(function () {
-    new Losp\Locale('UTF-8', 'en', 'res/invalid/section-prefix-missing.xml');
+    new Losp\Locale('UTF-8', 'en', __DIR__ . '/res/invalid/section-prefix-missing.xml');
 }, '/section node is missing "prefix" attribute/');
 assert_throw(function () {
-    new Losp\Locale('UTF-8', 'en', 'res/invalid/string-key-duplicate.xml');
+    new Losp\Locale('UTF-8', 'en', __DIR__ . '/res/invalid/string-key-duplicate.xml');
 }, '/string node has duplicated key "dupe"/');
 assert_throw(function () {
-    new Losp\Locale('UTF-8', 'en', 'res/invalid/string-key-missing.xml');
+    new Losp\Locale('UTF-8', 'en', __DIR__ . '/res/invalid/string-key-missing.xml');
 }, '/string node is missing "key" attribute/');
